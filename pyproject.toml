@@ -1,0 +1,38 @@
+[project]
+name = "tools-for-ynab"
+version = "0.1.0"
+description = "Rules and reports for YNAB: auto-categorize transactions and email spending trends"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "requests>=2.31",
+    "pyyaml>=6.0",
+    "python-dotenv>=1.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "ruff>=0.17.1",
+]
+
+[project.scripts]
+tools4ynab = "tools_for_ynab.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.11.8,<0.14"]
+build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["tests"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.ruff.lint.per-file-ignores]
+# Inline HTML email templates: long lines are clearer than artificial wrapping.
+"src/tools_for_ynab/reports/render.py" = ["E501"]
