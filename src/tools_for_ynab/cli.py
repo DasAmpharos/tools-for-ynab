@@ -10,6 +10,7 @@ from tools_for_ynab.rules.cli import rules
 
 
 @click.group(context_settings=CONTEXT_SETTINGS)
+@click.version_option(package_name="tools-for-ynab")
 def cli() -> None:
     """Command-line tools to automate YNAB budgets."""
 

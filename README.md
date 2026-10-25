@@ -320,6 +320,22 @@ failure handling) against an in-memory fake of the YNAB API, including both ways
 might handle a transfer. Real YNAB behavior for splits and transfer merges has not
 yet been confirmed against a live write; see `YNAB_DISABLED_RULES` above.
 
+## Releasing
+
+The version comes from the git tag; there is no version number to edit. Once the changes
+are merged to `main`:
+
+```bash
+git switch main && git pull
+git tag -a v0.3.0 -m "v0.3.0"   # semver: bump the minor for features, the patch for fixes
+git push origin v0.3.0
+```
+
+Config repos then move to it by changing `tag = "v0.3.0"` and running `uv lock`.
+`tools4ynab --version` shows what is installed. Between tags, builds get a development
+version such as `0.3.1.dev2+g1a2b3c4`. Release tags can't be moved or deleted (a repo
+rule), so a bad release is fixed with a new one.
+
 ## Disclaimer
 
 We are not affiliated, associated, or in any way officially connected with YNAB or any of
