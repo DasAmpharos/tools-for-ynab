@@ -1,13 +1,14 @@
 [project]
 name = "tools-for-ynab"
 version = "0.1.0"
-description = "Rules and reports for YNAB: auto-categorize transactions and email spending trends"
+description = "Command-line tools to automate YNAB budgets"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "requests>=2.31",
     "pyyaml>=6.0",
     "python-dotenv>=1.0",
+    "click>=8.5.0",
 ]
 
 [dependency-groups]
@@ -17,7 +18,7 @@ dev = [
 ]
 
 [project.scripts]
-tools4ynab = "tools_for_ynab.cli:main"
+tools4ynab = "tools_for_ynab.cli:cli"
 
 [build-system]
 requires = ["uv_build>=0.11.8,<0.14"]
