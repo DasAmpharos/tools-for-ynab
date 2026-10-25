@@ -4,13 +4,16 @@ Read-only. `monthly` (the default) combines both reports; `--email` sends it."""
 
 from __future__ import annotations
 
-import argparse
-import sys
-from datetime import date
+from collections.abc import Callable
+from datetime import date, datetime
 from pathlib import Path
+from typing import Any
+
+import click
 
 from tools_for_ynab.core import notify
 from tools_for_ynab.core.client import YnabError
+from tools_for_ynab.core.commands import DefaultGroup
 from tools_for_ynab.core.session import Session, open_session, where
 from tools_for_ynab.rules.rules import RuleError, load_rules
 
@@ -20,7 +23,6 @@ from .drift import analyze_drift
 from .render import assemble, summary, to_html, to_text
 from .subscriptions import find_subscriptions
 
-COMMANDS = ("monthly", "drift", "subscriptions")
 SECTIONS = {
     "monthly": ("drift", "subscriptions"),
     "drift": ("drift",),
@@ -28,26 +30,6 @@ SECTIONS = {
 }
 RECIPIENT_VARS = ("REPORT_EMAIL_TO", "NOTIFY_EMAIL_TO")
 HISTORY_MONTHS = 14
-
-
-def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="tools4ynab reports", description=__doc__)
-    parser.add_argument("command", nargs="?", choices=COMMANDS, default="monthly")
-    parser.add_argument(
-        "--config", type=Path, default=Path("reports.yaml"), help="optional settings"
-    )
-    parser.add_argument(
-        "--rules",
-        type=Path,
-        default=Path("rules.yaml"),
-        help="rules file, used to say which rule a price change broke (optional)",
-    )
-    parser.add_argument(
-        "--as-of", type=date.fromisoformat, help="report as of this date (YYYY-MM-DD)"
-    )
-    parser.add_argument("--email", action="store_true", help="email the report")
-    parser.add_argument("--save-html", type=Path, help="also write the email version to this file")
-    return parser
 
 
 def _since(as_of: date) -> date:
@@ -58,30 +40,38 @@ def _since(as_of: date) -> date:
     return date(y, m, 1)
 
 
-def run(session: Session, args: argparse.Namespace) -> int:
-    cfg = load_config(args.config)
-    as_of = args.as_of or date.today()
-    if args.email and notify.EmailConfig.from_env(session.env, RECIPIENT_VARS) is None:
-        print(
+def run(
+    session: Session,
+    sections: tuple[str, ...],
+    config: Path,
+    rules_path: Path,
+    as_of: datetime | None,
+    email: bool,
+    save_html: Path | None,
+) -> int:
+    cfg = load_config(config)
+    as_of_day = as_of.date() if as_of else date.today()
+    if email and notify.EmailConfig.from_env(session.env, RECIPIENT_VARS) is None:
+        click.echo(
             "Email is not configured: set SMTP_USER, SMTP_PASSWORD and REPORT_EMAIL_TO "
             "(or NOTIFY_EMAIL_TO).",
-            file=sys.stderr,
+            err=True,
         )
         return 1
 
     categories = session.client.categories()
-    txns = session.client.transactions(_since(as_of))
+    txns = session.client.transactions(_since(as_of_day))
     items = spend_items(txns, categories, cfg)
-    months = complete_months(txns, as_of)
+    months = complete_months(txns, as_of_day)
 
     rules = []
-    if args.rules.exists():
+    if rules_path.exists():
         try:
-            rules = load_rules(args.rules).rules
+            rules = load_rules(rules_path).rules
         except RuleError as e:
-            print(f"note: rules not checked against price changes ({e})", file=sys.stderr)
+            click.echo(f"note: rules not checked against price changes ({e})", err=True)
 
-    subs = find_subscriptions(items, as_of, rules)
+    subs = find_subscriptions(items, as_of_day, rules)
     # Fixed recurring charges (mortgage, subscriptions) only move when a price changes or a
     # payment lands a day early; that is reported under recurring charges, not as a trend.
     recurring = {(s.payee, s.category) for s in subs}
@@ -90,34 +80,35 @@ def run(session: Session, args: argparse.Namespace) -> int:
         analyze_drift(trend_items, months, cfg),
         subs,
         months,
-        as_of,
+        as_of_day,
         cfg,
         notify.run_url(session.env),
-        SECTIONS[args.command],
+        sections,
     )
     text, body = to_text(report), to_html(report)
     if session.quiet:
         # GitHub Actions logs are readable by anyone with repo access: counts only.
-        print(f"Report for {as_of:%Y-%m}: {summary(report)}.")
-        if not args.email:
-            print("Nothing sent. Re-run with the verbose option to print the report in the log.")
+        click.echo(f"Report for {as_of_day:%Y-%m}: {summary(report)}.")
+        if not email:
+            click.echo(
+                "Nothing sent. Re-run with the verbose option to print the report in the log."
+            )
     else:
-        print(text)
-    if args.save_html:
-        args.save_html.write_text(body)
-        print(f"Wrote {args.save_html}", file=sys.stderr)
-    if args.email:
+        click.echo(text)
+    if save_html:
+        save_html.write_text(body)
+        click.echo(f"Wrote {save_html}", err=True)
+    if email:
         session.send_email(report.subject, text, body, RECIPIENT_VARS)
     return 0
 
 
-def main(argv: list[str] | None = None) -> int:
-    args = build_parser().parse_args(argv)
+def _execute(fn: Callable[..., int], params: dict[str, Any]) -> int:
     session = open_session()
     if session is None:
         return 2
     try:
-        code, message = run(session, args), None
+        code, message = fn(session, **params), None
     except (YnabError, ReportError) as e:
         code, message = 1, session.scrub(str(e))
     except Exception as e:  # noqa: BLE001 - never print a raw traceback that could hold a URL
@@ -127,9 +118,54 @@ def main(argv: list[str] | None = None) -> int:
     if session.quiet:
         session.print_trace()
     if message is not None:
-        print(f"error: {message}", file=sys.stderr)
+        click.echo(f"error: {message}", err=True)
     return code
 
 
-if __name__ == "__main__":
-    sys.exit(main())
+def report_command(name: str, help_: str) -> click.Command:
+    """One report command; they differ only in which sections they include."""
+
+    @click.command(name, help=help_)
+    @click.option(
+        "--config",
+        type=click.Path(path_type=Path),
+        default="reports.yaml",
+        show_default=True,
+        help="Optional settings.",
+    )
+    @click.option(
+        "--rules",
+        "rules_path",
+        type=click.Path(path_type=Path),
+        default="rules.yaml",
+        show_default=True,
+        help="Rules file, used to say which rule a price change broke (optional).",
+    )
+    @click.option(
+        "--as-of",
+        type=click.DateTime(["%Y-%m-%d"]),
+        metavar="YYYY-MM-DD",
+        help="Report as of this date instead of today.",
+    )
+    @click.option("--email", is_flag=True, help="Email the report.")
+    @click.option(
+        "--save-html",
+        type=click.Path(path_type=Path),
+        help="Also write the email version to this file.",
+    )
+    def command(**params: Any) -> None:
+        click.get_current_context().exit(_execute(run, {**params, "sections": SECTIONS[name]}))
+
+    return command
+
+
+@click.group(cls=DefaultGroup, default_command="monthly")
+def reports() -> None:
+    """Spending trends and recurring charges from your YNAB history. Read-only.
+
+    With no command, runs `monthly`."""
+
+
+reports.add_command(report_command("monthly", "Trends and recurring charges together."))
+reports.add_command(report_command("drift", "Just the spending trends."))
+reports.add_command(report_command("subscriptions", "Just the recurring charges."))

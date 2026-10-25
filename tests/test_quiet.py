@@ -4,12 +4,11 @@ import json
 from pathlib import Path
 
 import pytest
+from cli_helpers import reports_main, rules_main
 from test_reports_cli import seed as seed_reports
 
 from tools_for_ynab.core.client import YnabClient
 from tools_for_ynab.core.session import quiet_mode, where
-from tools_for_ynab.reports.cli import main as reports_main
-from tools_for_ynab.rules.cli import main as rules_main
 
 RULES = """\
 settings: {since_days: 30, scope: unapproved}

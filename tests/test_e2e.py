@@ -4,9 +4,8 @@ unit tests can't (HTTP shape, audit log, email, undo)."""
 import json
 from pathlib import Path
 
+from cli_helpers import rules_main as main
 from fake_ynab import FakeYnab
-
-from tools_for_ynab.rules.cli import main
 
 
 def seed(y: FakeYnab):

@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from tools_for_ynab.reports.cli import main
+from cli_helpers import reports_main as main
 
 AS_OF = ["--as-of", "2026-10-17"]
 

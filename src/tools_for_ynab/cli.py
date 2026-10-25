@@ -1,32 +1,22 @@
-"""usage: tools4ynab {rules,reports} ...
-
-rules    auto-categorize transactions (see `tools4ynab rules -h`)
-reports  spending trends and recurring charges (see `tools4ynab reports -h`)"""
+"""`tools4ynab`: the entry point that groups the tools."""
 
 from __future__ import annotations
 
-import sys
-from collections.abc import Callable
+import click
 
-from tools_for_ynab.reports import cli as reports_cli
-from tools_for_ynab.rules import cli as rules_cli
-
-TOOLS: dict[str, Callable[[list[str]], int]] = {
-    "rules": rules_cli.main,
-    "reports": reports_cli.main,
-}
+from tools_for_ynab.core.commands import CONTEXT_SETTINGS
+from tools_for_ynab.reports.cli import reports
+from tools_for_ynab.rules.cli import rules
 
 
-def main(argv: list[str] | None = None) -> int:
-    argv = list(sys.argv[1:] if argv is None else argv)
-    if argv and argv[0] in TOOLS:
-        return TOOLS[argv[0]](argv[1:])
-    if argv[:1] in (["-h"], ["--help"]):
-        print(__doc__)
-        return 0
-    print(__doc__, file=sys.stderr)
-    return 2
+@click.group(context_settings=CONTEXT_SETTINGS)
+def cli() -> None:
+    """Command-line tools to automate YNAB budgets."""
+
+
+cli.add_command(rules)
+cli.add_command(reports)
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    cli()

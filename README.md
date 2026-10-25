@@ -56,7 +56,9 @@ uv run tools4ynab rules --apply  # writes the changes to YNAB
 uv run tools4ynab reports        # prints the monthly report
 ```
 
-`tools4ynab rules` with no subcommand is `tools4ynab rules run`. Commands read
+`tools4ynab rules` with no subcommand is `tools4ynab rules run`, and `tools4ynab reports`
+is `tools4ynab reports monthly`. Options go after the command name
+(`tools4ynab reports drift --email`), and `-h` works at every level. Commands read
 `rules.yaml`, `reports.yaml` and `.env` from the current folder (`--rules` and
 `--config` point elsewhere).
 
