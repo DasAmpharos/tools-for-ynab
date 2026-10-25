@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from tools_for_ynab.core.notify import render_list
+from tools4ynab.core.notify import render_list
 
 
 def _line(e: dict[str, Any]) -> str:

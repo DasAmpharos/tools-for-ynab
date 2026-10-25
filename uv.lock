@@ -260,7 +260,7 @@ wheels = [
 ]
 
 [[package]]
-name = "tools-for-ynab"
+name = "tools4ynab"
 source = { editable = "." }
 dependencies = [
     { name = "click" },

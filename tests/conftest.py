@@ -32,7 +32,7 @@ def ynab(monkeypatch, tmp_path) -> FakeYnab:
         requests.Session, "request", lambda self, method, url, **kw: fake.request(method, url, **kw)
     )
     monkeypatch.setattr(
-        "tools_for_ynab.core.session.load_dotenv", lambda *a, **k: None
+        "tools4ynab.core.session.load_dotenv", lambda *a, **k: None
     )  # never read a real .env
     for var in (
         "SMTP_USER",

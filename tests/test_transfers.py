@@ -1,8 +1,8 @@
 import pytest
 
-from tools_for_ynab.core.client import YnabError
-from tools_for_ynab.rules.rules import Match, TransferRule
-from tools_for_ynab.rules.transfers import apply_pair, find_pairs
+from tools4ynab.core.client import YnabError
+from tools4ynab.rules.rules import Match, TransferRule
+from tools4ynab.rules.transfers import apply_pair, find_pairs
 
 RULE = TransferRule(
     "ktc",

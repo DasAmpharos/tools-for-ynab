@@ -34,4 +34,4 @@ def test_version_comes_from_the_installed_package(capsys):
     from importlib.metadata import version
 
     assert tools4ynab(["--version"]) == 0
-    assert version("tools-for-ynab") in capsys.readouterr().out
+    assert version("tools4ynab") in capsys.readouterr().out

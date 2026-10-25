@@ -1,9 +1,9 @@
 from pathlib import Path
 
-from tools_for_ynab.core.client import YnabClient
-from tools_for_ynab.rules import analysis
-from tools_for_ynab.rules.planner import load_context
-from tools_for_ynab.rules.rules import load_rules
+from tools4ynab.core.client import YnabClient
+from tools4ynab.rules import analysis
+from tools4ynab.rules.planner import load_context
+from tools4ynab.rules.rules import load_rules
 
 
 def ctx_and_txns(y, extra_categories=()):
@@ -130,8 +130,8 @@ def test_rendered_suggestions_parse_and_resolve(ynab):
     text = analysis.render_suggestions(analysis.suggest(ctx, txns), 6)
     import yaml
 
-    from tools_for_ynab.rules.engine import resolve_categories
-    from tools_for_ynab.rules.rules import _parse_sections
+    from tools4ynab.rules.engine import resolve_categories
+    from tools4ynab.rules.rules import _parse_sections
 
     rules, _, _ = _parse_sections(yaml.safe_load(text))
     assert len(rules) == 2

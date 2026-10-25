@@ -7,8 +7,8 @@ import pytest
 from cli_helpers import reports_main, rules_main
 from test_reports_cli import seed as seed_reports
 
-from tools_for_ynab.core.client import YnabClient
-from tools_for_ynab.core.session import quiet_mode, where
+from tools4ynab.core.client import YnabClient
+from tools4ynab.core.session import quiet_mode, where
 
 RULES = """\
 settings: {since_days: 30, scope: unapproved}
@@ -128,7 +128,7 @@ def test_unexpected_errors_report_the_place_not_the_data(world, monkeypatch, cap
     def boom(*a, **k):
         raise KeyError("Zxcv Mart")
 
-    monkeypatch.setattr("tools_for_ynab.rules.cli.apply_plan", boom)
+    monkeypatch.setattr("tools4ynab.rules.cli.apply_plan", boom)
     assert rules_main(["run", "--apply"]) == 1
     err = output(capsys)
     assert "KeyError at cli.py:" in err and "Zxcv" not in err
@@ -174,7 +174,7 @@ def test_reports_unexpected_errors_report_the_place_not_the_data(ynab, monkeypat
     def boom(*a, **k):
         raise ValueError("Shopwell")
 
-    monkeypatch.setattr("tools_for_ynab.reports.cli.analyze_drift", boom)
+    monkeypatch.setattr("tools4ynab.reports.cli.analyze_drift", boom)
     assert reports_main(["--as-of", "2026-10-17"]) == 1
     err = output(capsys)
     assert "ValueError at cli.py:" in err and "Shopwell" not in err

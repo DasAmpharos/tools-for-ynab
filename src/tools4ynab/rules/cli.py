@@ -13,10 +13,10 @@ from typing import Any
 
 import click
 
-from tools_for_ynab.core import notify
-from tools_for_ynab.core.client import YnabError
-from tools_for_ynab.core.commands import DefaultGroup
-from tools_for_ynab.core.session import Session, open_session, where
+from tools4ynab.core import notify
+from tools4ynab.core.client import YnabError
+from tools4ynab.core.commands import DefaultGroup
+from tools4ynab.core.session import Session, open_session, where
 
 from . import analysis, digest
 from .audit import AuditLog, fetch_github_audit, latest_log, load_entries, plan_undo

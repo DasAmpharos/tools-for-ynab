@@ -1,7 +1,7 @@
 import pytest
 
-from tools_for_ynab.rules.engine import build_category_index, plan_changes, resolve_categories
-from tools_for_ynab.rules.rules import Actions, Match, Rule, RuleError
+from tools4ynab.rules.engine import build_category_index, plan_changes, resolve_categories
+from tools4ynab.rules.rules import Actions, Match, Rule, RuleError
 
 CATEGORIES = [
     {"id": "c-groc", "name": "Groceries", "group_name": "Food"},

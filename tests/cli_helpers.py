@@ -3,9 +3,9 @@ instead of exiting, so tests can assert on it and read the output with capsys.""
 
 import click
 
-from tools_for_ynab.cli import cli
-from tools_for_ynab.reports.cli import reports
-from tools_for_ynab.rules.cli import rules
+from tools4ynab.cli import cli
+from tools4ynab.reports.cli import reports
+from tools4ynab.rules.cli import rules
 
 
 def invoke(command: click.Command, args: list[str], prog_name: str) -> int:

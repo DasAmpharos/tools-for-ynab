@@ -12,7 +12,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from tools_for_ynab.core.client import YnabClient, YnabError
+from tools4ynab.core.client import YnabClient, YnabError
 
 # Fields a categorization rule can change; the only ones `undo` knows how to restore.
 UNDOABLE = {"category_id", "payee_name", "memo", "flag_color", "approved"}

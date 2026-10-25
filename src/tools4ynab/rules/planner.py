@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from tools_for_ynab.core.client import YnabClient
+from tools4ynab.core.client import YnabClient
 
 from .audit import AuditLog
 from .engine import (

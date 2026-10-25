@@ -339,7 +339,7 @@ def test_test_email_surfaces_a_login_failure_without_the_password(
 
 
 def test_gmail_app_password_spaces_are_ignored(monkeypatch):
-    from tools_for_ynab.core.notify import EmailConfig
+    from tools4ynab.core.notify import EmailConfig
 
     cfg = EmailConfig.from_env(
         {
