@@ -1,7 +1,7 @@
-# tools-for-ynab
+# tools4ynab
 
-Two small tools for [YNAB](https://www.ynab.com), sharing one API client and email setup,
-run with one command, `tools4ynab`:
+Command-line tools to automate [YNAB](https://www.ynab.com) budgets, all run through one
+command, `tools4ynab`, and sharing one API client and email setup. So far:
 
 - **`tools4ynab rules`** auto-categorizes transactions with Monarch-style rules from a
   `rules.yaml` you write.
@@ -10,7 +10,7 @@ run with one command, `tools4ynab`:
 
 This repo is only the code. Each person keeps their own budget details (`rules.yaml`,
 `reports.yaml`, `.env`) in a separate, private config repo or folder and installs
-tools-for-ynab there. Nothing in this repo is specific to anyone's budget.
+tools4ynab there. Nothing in this repo is specific to anyone's budget.
 
 Requires Python 3.14 (uv installs it for you).
 
@@ -20,7 +20,7 @@ Make a folder (ideally a private git repo) for your budget:
 
 ```
 my-budget/
-  pyproject.toml   # depends on tools-for-ynab
+  pyproject.toml   # depends on tools4ynab
   rules.yaml       # your rules (see Rules below)
   reports.yaml     # optional report settings
   .env             # your API key and email settings; never commit this
@@ -34,23 +34,23 @@ my-budget/
 name = "my-budget"
 version = "0"
 requires-python = ">=3.14"
-dependencies = ["tools-for-ynab"]
+dependencies = ["tools4ynab"]
 
 [tool.uv]
 package = false
 
 [tool.uv.sources]
 # Pin a tag or commit so updates to the shared code only reach you when you choose.
-tools-for-ynab = { git = "https://github.com/DasAmpharos/tools-for-ynab", tag = "v0.1.0" }
+tools4ynab = { git = "https://github.com/DasAmpharos/tools4ynab", tag = "v0.2.0" }
 # Or, while working on the shared code next to it:
-# tools-for-ynab = { path = "../tools-for-ynab", editable = true }
+# tools4ynab = { path = "../tools4ynab", editable = true }
 ```
 
 Then:
 
 ```bash
-uv sync                          # installs Python + tools-for-ynab into .venv
-cp ../tools-for-ynab/.env.example .env   # then fill in YNAB_API_KEY
+uv sync                          # installs Python + tools4ynab into .venv
+cp ../tools4ynab/.env.example .env   # then fill in YNAB_API_KEY
 uv run tools4ynab rules          # dry run: prints what would change
 uv run tools4ynab rules --apply  # writes the changes to YNAB
 uv run tools4ynab reports        # prints the monthly report
@@ -319,6 +319,22 @@ The end-to-end tests drive the whole program (`--apply`, audit log, email, undo,
 failure handling) against an in-memory fake of the YNAB API, including both ways YNAB
 might handle a transfer. Real YNAB behavior for splits and transfer merges has not
 yet been confirmed against a live write; see `YNAB_DISABLED_RULES` above.
+
+## Releasing
+
+The version comes from the git tag; there is no version number to edit. Once the changes
+are merged to `main`:
+
+```bash
+git switch main && git pull
+git tag -a v0.3.0 -m "v0.3.0"   # semver: bump the minor for features, the patch for fixes
+git push origin v0.3.0
+```
+
+Config repos then move to it by changing `tag = "v0.3.0"` and running `uv lock`.
+`tools4ynab --version` shows what is installed. Between tags, builds get a development
+version such as `0.3.1.dev2+g1a2b3c4`. Release tags can't be moved or deleted (a repo
+rule), so a bad release is fixed with a new one.
 
 ## Disclaimer
 

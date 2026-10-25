@@ -6,11 +6,15 @@ import os
 import sys
 import traceback
 from collections.abc import Mapping
+from pathlib import Path
 
 from dotenv import find_dotenv, load_dotenv
 
 from . import notify
 from .client import YnabClient
+
+# The installed package (src/tools4ynab), whatever the folder around it is called.
+PACKAGE_DIR = Path(__file__).resolve().parent.parent
 
 
 def quiet_mode(env: Mapping[str, str]) -> bool:
@@ -26,7 +30,7 @@ def quiet_mode(env: Mapping[str, str]) -> bool:
 def where(exc: BaseException) -> str:
     """Where an exception came from (file:line in function), without any of its data."""
     frames = traceback.extract_tb(exc.__traceback__)
-    ours = [f for f in frames if "/tools_for_ynab/" in f.filename.replace("\\", "/")]
+    ours = [f for f in frames if Path(f.filename).resolve().is_relative_to(PACKAGE_DIR)]
     f = (ours or frames or [None])[-1]
     return f"{f.filename.rsplit('/', 1)[-1]}:{f.lineno} in {f.name}" if f else "unknown"
 

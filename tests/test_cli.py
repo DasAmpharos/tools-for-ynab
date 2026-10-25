@@ -28,3 +28,10 @@ def test_unknown_tool_or_option_is_a_usage_error(capsys):
     assert "No such command 'budget'" in capsys.readouterr().err
     assert tools4ynab(["rules", "run", "--bogus"]) == 2
     assert tools4ynab(["reports", "--as-of", "October"]) == 2
+
+
+def test_version_comes_from_the_installed_package(capsys):
+    from importlib.metadata import version
+
+    assert tools4ynab(["--version"]) == 0
+    assert version("tools4ynab") in capsys.readouterr().out

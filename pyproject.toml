@@ -1,6 +1,6 @@
 [project]
-name = "tools-for-ynab"
-version = "0.1.0"
+name = "tools4ynab"
+dynamic = ["version"]  # from the git tag (v0.2.0 -> 0.2.0); see "Releasing" in the README
 description = "Command-line tools to automate YNAB budgets"
 readme = "README.md"
 requires-python = ">=3.14"
@@ -18,11 +18,17 @@ dev = [
 ]
 
 [project.scripts]
-tools4ynab = "tools_for_ynab.cli:cli"
+tools4ynab = "tools4ynab.cli:cli"
 
 [build-system]
-requires = ["uv_build>=0.11.8,<0.14"]
-build-backend = "uv_build"
+requires = ["hatchling>=1.27", "hatch-vcs>=0.5"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/tools4ynab"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -36,4 +42,4 @@ select = ["E", "F", "I", "B", "UP"]
 
 [tool.ruff.lint.per-file-ignores]
 # Inline HTML email templates: long lines are clearer than artificial wrapping.
-"src/tools_for_ynab/reports/render.py" = ["E501"]
+"src/tools4ynab/reports/render.py" = ["E501"]

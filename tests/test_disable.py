@@ -1,6 +1,6 @@
 import pytest
 
-from tools_for_ynab.rules.rules import (
+from tools4ynab.rules.rules import (
     Actions,
     Match,
     Rule,

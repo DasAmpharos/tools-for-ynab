@@ -2,12 +2,12 @@ from datetime import date
 
 import pytest
 
-from tools_for_ynab.reports.config import ReportConfig, ReportError, load_config
-from tools_for_ynab.reports.data import Spend, complete_months, spend_items
-from tools_for_ynab.reports.drift import analyze_drift, sparkline
-from tools_for_ynab.reports.render import build_report, money
-from tools_for_ynab.reports.subscriptions import find_subscriptions
-from tools_for_ynab.rules.rules import Actions, Match, Rule
+from tools4ynab.reports.config import ReportConfig, ReportError, load_config
+from tools4ynab.reports.data import Spend, complete_months, spend_items
+from tools4ynab.reports.drift import analyze_drift, sparkline
+from tools4ynab.reports.render import build_report, money
+from tools4ynab.reports.subscriptions import find_subscriptions
+from tools4ynab.rules.rules import Actions, Match, Rule
 
 CATS = [
     {"id": "g", "name": "Groceries", "group_name": "Everyday"},
@@ -269,7 +269,7 @@ def test_down_rows_say_what_was_cut_not_what_was_spent():
 
 
 def test_cancelled_charges_are_one_quiet_callout_and_late_ones_are_loud():
-    from tools_for_ynab.reports.render import assemble
+    from tools4ynab.reports.render import assemble
 
     old = monthly("Gym", "Gym", [30, 30, 30], start="2026-03-05") + monthly(
         "Pool", "Pool", [40, 40, 40], start="2026-03-06"
@@ -293,7 +293,7 @@ def test_cancelled_charges_are_one_quiet_callout_and_late_ones_are_loud():
 
 
 def test_label_adds_the_merchant_only_when_it_adds_information():
-    from tools_for_ynab.reports.render import label
+    from tools4ynab.reports.render import label
 
     assert label("Flixly", "📺 Flixly") == "📺 Flixly"
     assert label("HomeLoan Co", "🏠 Mortgage") == "🏠 Mortgage (HomeLoan Co)"

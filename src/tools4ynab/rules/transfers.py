@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from datetime import date
 from typing import Any
 
-from tools_for_ynab.core.client import YnabClient, YnabError
+from tools4ynab.core.client import YnabClient, YnabError
 
 from .rules import TransferRule
 

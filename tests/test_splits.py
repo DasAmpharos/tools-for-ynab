@@ -1,8 +1,8 @@
 import pytest
 
-from tools_for_ynab.core.client import YnabError
-from tools_for_ynab.rules.engine import apply_split, plan_splits
-from tools_for_ynab.rules.rules import RuleError, _parse_split
+from tools4ynab.core.client import YnabError
+from tools4ynab.rules.engine import apply_split, plan_splits
+from tools4ynab.rules.rules import RuleError, _parse_split
 
 IDS = {"Comedy": "c-d", "Assistant": "c-c", "Sketches": "c-s"}
 BUNDLE = {
