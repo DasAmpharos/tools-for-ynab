@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import click
 
+from tools4ynab.budget.cli import budget
 from tools4ynab.core.commands import CONTEXT_SETTINGS
 from tools4ynab.reports.cli import reports
 from tools4ynab.rules.cli import rules
@@ -17,6 +18,7 @@ def cli() -> None:
 
 cli.add_command(rules)
 cli.add_command(reports)
+cli.add_command(budget)
 
 
 if __name__ == "__main__":

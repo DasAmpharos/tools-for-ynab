@@ -57,6 +57,18 @@ class YnabClient:
         data = self._request("GET", f"/budgets/{self.budget_id}/accounts")
         return {a["id"]: a for a in data["accounts"] if not a["deleted"]}
 
+    def assigned(self, month: date) -> dict[str, int]:
+        """Assigned ("budgeted") milliunits per category id for the month containing `month`."""
+        data = self._request("GET", f"/budgets/{self.budget_id}/months/{month:%Y-%m-01}")
+        return {c["id"]: c["budgeted"] for c in data["month"]["categories"] if not c["deleted"]}
+
+    def set_assigned(self, month: date, category_id: str, milliunits: int) -> None:
+        self._request(
+            "PATCH",
+            f"/budgets/{self.budget_id}/months/{month:%Y-%m-01}/categories/{category_id}",
+            json={"category": {"budgeted": milliunits}},
+        )
+
     def get_transaction(self, txn_id: str) -> dict[str, Any]:
         data = self._request("GET", f"/budgets/{self.budget_id}/transactions/{txn_id}")
         return data["transaction"]

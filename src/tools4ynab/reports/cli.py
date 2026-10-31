@@ -4,7 +4,6 @@ Read-only. `monthly` (the default) combines both reports; `--email` sends it."""
 
 from __future__ import annotations
 
-from collections.abc import Callable
 from datetime import date, datetime
 from pathlib import Path
 from typing import Any
@@ -13,8 +12,8 @@ import click
 
 from tools4ynab.core import notify
 from tools4ynab.core.client import YnabError
-from tools4ynab.core.commands import DefaultGroup
-from tools4ynab.core.session import Session, open_session, where
+from tools4ynab.core.commands import DefaultGroup, execute
+from tools4ynab.core.session import Session
 from tools4ynab.rules.rules import RuleError, load_rules
 
 from .config import ReportError, load_config
@@ -103,25 +102,6 @@ def run(
     return 0
 
 
-def _execute(fn: Callable[..., int], params: dict[str, Any]) -> int:
-    session = open_session()
-    if session is None:
-        return 2
-    try:
-        code, message = fn(session, **params), None
-    except (YnabError, ReportError) as e:
-        code, message = 1, session.scrub(str(e))
-    except Exception as e:  # noqa: BLE001 - never print a raw traceback that could hold a URL
-        # Exception text can hold data (a KeyError names its key), so CI logs get type + place.
-        detail = f"{type(e).__name__} at {where(e)}"
-        code, message = 1, session.scrub(detail if session.quiet else f"{detail}: {e}")
-    if session.quiet:
-        session.print_trace()
-    if message is not None:
-        click.echo(f"error: {message}", err=True)
-    return code
-
-
 def report_command(name: str, help_: str) -> click.Command:
     """One report command; they differ only in which sections they include."""
 
@@ -154,7 +134,8 @@ def report_command(name: str, help_: str) -> click.Command:
         help="Also write the email version to this file.",
     )
     def command(**params: Any) -> None:
-        click.get_current_context().exit(_execute(run, {**params, "sections": SECTIONS[name]}))
+        params["sections"] = SECTIONS[name]
+        click.get_current_context().exit(execute(run, params, (YnabError, ReportError)))
 
     return command
 

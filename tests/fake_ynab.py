@@ -59,6 +59,7 @@ class FakeYnab:
             },
         }
         self.txns: dict[str, dict[str, Any]] = {}
+        self.assigned: dict[tuple[str, str], int] = {}  # (YYYY-MM-01, category id) -> milliunits
 
     @staticmethod
     def _cat(name: str) -> dict[str, Any]:
@@ -129,6 +130,24 @@ class FakeYnab:
             return self._ok(
                 {"transactions": [deepcopy(t) for t in self.txns.values() if t["date"] >= since]}
             )
+        if method == "GET" and (m := re.fullmatch(r"/months/(\d{4}-\d{2}-01)", path)):
+            cats = [c for g in self.groups for c in g["categories"]]
+            return self._ok(
+                {
+                    "month": {
+                        "month": m.group(1),
+                        "categories": [
+                            {**c, "budgeted": self.assigned.get((m.group(1), c["id"]), 0)}
+                            for c in cats
+                        ],
+                    }
+                }
+            )
+        if method == "PATCH" and (
+            m := re.fullmatch(r"/months/(\d{4}-\d{2}-01)/categories/([\w-]+)", path)
+        ):
+            self.assigned[m.groups()] = json["category"]["budgeted"]
+            return self._ok({"category": {"id": m.group(2)}})
         if m := re.fullmatch(r"/transactions/([\w-]+)", path):
             tid = m.group(1)
             if tid not in self.txns:
