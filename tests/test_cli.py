@@ -24,8 +24,8 @@ def test_help_lists_the_tools_and_their_commands(capsys):
 
 
 def test_unknown_tool_or_option_is_a_usage_error(capsys):
-    assert tools4ynab(["budget"]) == 2
-    assert "No such command 'budget'" in capsys.readouterr().err
+    assert tools4ynab(["bogus"]) == 2
+    assert "No such command 'bogus'" in capsys.readouterr().err
     assert tools4ynab(["rules", "run", "--bogus"]) == 2
     assert tools4ynab(["reports", "--as-of", "October"]) == 2
 

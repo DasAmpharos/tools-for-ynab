@@ -7,6 +7,8 @@ command, `tools4ynab`, and sharing one API client and email setup. So far:
   `rules.yaml` you write.
 - **`tools4ynab reports`** is read-only: a monthly report on spending trends and recurring
   charges (see [Reports](#reports)).
+- **`tools4ynab budget`** copies this month's assigned amounts into next month as a
+  starting point (see [Budget](#budget)).
 
 This repo is only the code. Each person keeps their own budget details (`rules.yaml`,
 `reports.yaml`, `.env`) in a separate, private config repo or folder and installs
@@ -280,10 +282,34 @@ so renaming them in YNAB changes the report.
 Report recipients are `REPORT_EMAIL_TO` if set, otherwise `NOTIFY_EMAIL_TO`, so you can
 send reports to someone without sending them the rule notifications.
 
+## Budget
+
+`tools4ynab budget` (short for `tools4ynab budget copy`) fills in next month's budget with
+what you assigned this month, so you start from last month's plan and adjust instead of
+starting from zero. Like `rules`, it's a dry run unless `--apply`:
+
+```bash
+uv run tools4ynab budget                      # preview copying this month into next month
+uv run tools4ynab budget --apply              # write it to YNAB
+uv run tools4ynab budget --from 2026-10 --to 2027-01   # any two months
+uv run tools4ynab budget --overwrite --apply  # also replace amounts already set
+```
+
+- Only categories with an amount assigned in the `--from` month are copied. Others are left
+  as they are; nothing is set to zero.
+- An amount you've already assigned in the `--to` month is kept (the preview lists it)
+  unless you pass `--overwrite`.
+- Hidden categories and Ready to Assign are skipped.
+- It copies *assigned* amounts, not what you spent.
+
+Each category is one API call, and YNAB allows 200 an hour. If a run stops partway, the
+error says how far it got. Run it again to finish, because categories already copied are
+skipped.
+
 ## Logging and privacy
 
 GitHub Actions logs, step summaries and artifacts are readable by anyone with access to the
-repo, so in Actions (detected via `GITHUB_ACTIONS`) both tools run in **quiet mode**:
+repo, so in Actions (detected via `GITHUB_ACTIONS`) every command runs in **quiet mode**:
 
 | In the Actions log | Never in the Actions log |
 |---|---|
